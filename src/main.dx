@@ -1,0 +1,152 @@
+module main
+
+imports
+  signatures/start-sig
+
+
+primitives
+  statement #print(@value)
+  statement #exit()
+  expression #int-add(@value, @value)
+  expression #int-sub(@value, @value)
+  expression #int-mul(@value, @value)
+  expression #int-div(@value, @value)
+  conditional #int-eq(@value, @value)
+
+rules
+  evalProgram :: 'Start -> Holy
+  
+  evalStatements :: List('Statement) * @value -> @statement
+  
+  evalStatement :: 'Statement -> Holy
+  
+  evalExpression :: 'Expression -> Holy(@value)
+  
+  evalLabels :: List('Statement) * @value -> Holy
+  
+  evalCondition :: 'Condition * @value * @value -> @statement
+
+  evalProgram(Program(l)) = {
+    evalLabels(l, exit)
+    evalStatements(l, exit)
+  }
+  label exit/0:
+  
+  evalLabels([Label(l)|s], exit) = {
+  	v <- var(l)
+  	fix {
+  	  fun v([]) = {
+  	    evalStatements(s, exit)
+  	  }
+  	}
+  	evalLabels(s, exit)
+  }
+  evalLabels([_|s], exit) = evalLabels(s, exit)
+  evalLabels([], _) = hole
+
+  evalStatements([a|b], exit) = {
+    evalStatement(a)
+    evalStatements(b, exit)
+  }
+  
+  evalStatements([Label(l)|_], exit) = {
+    v <- var(l)
+    v@([])
+  }
+  
+  evalStatements([], exit) = exit@([])
+  
+  evalStatement(Print(e)) = {
+    x <- evalExpression(e)
+    #print(x)
+  }
+  
+  evalStatement(Simple(e)) = {
+    evalExpression(e)
+  }
+  
+  evalStatement(Assign(Variablee(x), e)) = {
+    v <- evalExpression(e)
+    t <- var(x)
+    let t = v in
+      hole
+  }
+  
+  evalStatements([Jump(x)|_], exit) = {
+    var(x)@([])
+  }
+  
+  evalStatement(Jump(x)) = {
+    var(x)@([])
+    label noop/0:
+  }
+  
+  evalStatement(If(c, s)) = {
+    true <- fresh-var(true)
+  	fix {
+      fun true([]) = {
+        evalStatement(s)
+        cont@([])
+      }
+  	}
+  	evalCondition(c, true, cont)
+  } label cont/0:
+  
+  evalCondition(Zero(e), true, false) = {
+    v <- evalExpression(e)
+    if #int-eq(v, int('0)) then {
+      true@([])
+    } else {
+      false@([])
+    }
+  }
+
+  evalExpression(Value(Int(i))) = int(i)
+  
+  evalExpression(Variable(Variablee(x))) = var(x)
+  
+  evalExpression(Add(e1, e2)) = {
+    v1 <- evalExpression(e1)
+    v2 <- evalExpression(e2)
+    #int-add(v1, v2)
+  }
+  
+  evalExpression(Sub(e1, e2)) = {
+    v1 <- evalExpression(e1)
+    v2 <- evalExpression(e2)
+    #int-sub(v1, v2)
+  }
+  
+  evalExpression(Mul(e1, e2)) = {
+    v1 <- evalExpression(e1)
+    v2 <- evalExpression(e2)
+    #int-mul(v1, v2)
+  }
+  
+  evalExpression(Div(e1, e2)) = {
+    v1 <- evalExpression(e1)
+    v2 <- evalExpression(e2)
+    #int-div(v1, v2)
+  }
+
+  evalExpression(Lambda(Variablee(v), e)) = {
+    lambda <- fresh-var(lambda)
+    tail <- fresh-var(tail)
+    t <- var(v)
+    fix {
+      fun lambda([t, tail]) = {
+        r <- evalExpression(e)
+        tail@([r])
+      }
+    }
+    lambda
+  }
+  
+  evalExpression(Apply(e1, e2)) = {
+    f <- evalExpression(e1)
+    arg <- evalExpression(e2)
+    
+    f@([arg, ret])
+    label ret/1:
+  }
+

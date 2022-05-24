@@ -1,0 +1,5 @@
+print(1)
+goto skip
+print(2)
+skip:
+print(3)

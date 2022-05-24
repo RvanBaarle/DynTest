@@ -1,0 +1,33 @@
+fix {
+  fun k46( ) =
+    #exit( )
+} in
+  fix {
+    fun loop( ) =
+      #int-sub(a, 1) => y67;
+      let a = y67 in
+        #print(a) => y68;
+        fix {
+          fun k47( ) =
+            loop( )
+        } in
+          fix {
+            fun true6( ) =
+              fix {
+                fun k48( ) =
+                  k47( )
+              } in
+                end( )
+          } in
+            if #int-eq(a, 0) then
+              true6( )
+            else
+              k47( )
+  } in
+    fix {
+      fun end( ) =
+        #print(80085) => y69;
+        k46( )
+    } in
+      let a = 100 in
+        loop( )

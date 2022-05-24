@@ -1,0 +1,6 @@
+shared.defaultArtifactId=dyntest
+shared.defaultClassPrefix=DynTest
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.dyntest
+shared.defaultVersion=0.1.0
+stratego.languageStrategyAffix=dyntest

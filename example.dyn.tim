@@ -1,0 +1,11 @@
+fix {
+  fun k45( ) =
+    #exit( )
+} in
+  fix {
+    fun skip( ) =
+      #print(3) => y65;
+      k45( )
+  } in
+    #print(1) => y66;
+    skip( )
