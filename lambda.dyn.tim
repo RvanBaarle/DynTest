@@ -1,0 +1,31 @@
+fix {
+  fun k21( ) =
+    #exit( )
+} in
+  #record-new( ) => y81;
+  fix {
+    fun lambda8(p419, p420, p421, tail16) =
+      #record-write(y81, "a", p419) => y82;
+      #record-write(y81, "b", p420) => y83;
+      #record-write(y81, "x", p421) => y84;
+      #record-read(y81, "a") => y85;
+      #record-read(y81, "x") => y86;
+      #int-mul(y85, y86) => y87;
+      #record-read(y81, "b") => y88;
+      #int-add(y87, y88) => y89;
+      tail16(y89)
+  } in
+    #record-write(y81, "f", lambda8) => y90;
+    #record-read(y81, "f") => y91;
+    fix {
+      fun k22(a151) =
+        #print(a151) => y92;
+        #record-read(y81, "a") => y93;
+        #print(y93) => y94;
+        #record-read(y81, "b") => y95;
+        #print(y95) => y96;
+        #record-read(y81, "x") => y97;
+        #print(y97) => y98;
+        k21( )
+    } in
+      y91(5, 6, 7, k22)

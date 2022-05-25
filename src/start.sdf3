@@ -1,7 +1,7 @@
 module start
 
 imports
-	lex
+  lex
 
 context-free start-symbols
 
@@ -15,18 +15,18 @@ context-free syntax
 
   Variable.Variablee = <<ID>>
   Value.Int = <<INT>>
-  
+
   Expression.Value = <<Value>>
   Expression.Variable = <<Variable>>
   Expression = <(<Expression>)> {bracket}
-  
+
   Expression.Add = <<Expression> + <Expression>> {left}
   Expression.Sub = <<Expression> - <Expression>> {left}
   Expression.Mul = <<Expression> * <Expression>> {left}
   Expression.Div = <<Expression> / <Expression>> {left}
-  Expression.Apply = <<Expression>(<Expression>)>
-  Expression.Lambda = [[Variable] -> [Expression]]
-  
+  Expression.Apply = <<Expression>(<{Expression ", "}*>)>
+  Expression.Lambda = [[{ID ", "}*] -> [Expression]]
+
   Statement.Print = <print(<Expression>)>
   Statement.Assign = <<Variable> = <Expression>>
   Statement.Simple = <<Expression>>
@@ -36,10 +36,13 @@ context-free syntax
       <s:Statement>
   > {layout(indent "if" s)}
   Statement.Label = <<ID>:>
-  
+
   Condition.Zero = <<Expression> is zero>
-  
+
   Start.Program = <<s:Statement*>> {layout(align-list s)}
+
+syntax
+  Value-CF.String = "\"" STRING-CF "\""
 
 lexical syntax
 
@@ -49,7 +52,7 @@ lexical syntax
 context-free restrictions
 
   LAYOUT? -/- [\ \n\v\f\r\/]
-  
+
 template options
 
   ID = keyword {reject}

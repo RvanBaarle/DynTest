@@ -1,11 +1,14 @@
 fix {
-  fun k45( ) =
+  fun k23( ) =
     #exit( )
 } in
+  #record-new( ) => y99;
   fix {
     fun skip( ) =
-      #print(3) => y65;
-      k45( )
+      #print(3) => y100;
+      k23( )
   } in
-    #print(1) => y66;
-    skip( )
+    #record-write(y99, "skip", skip) => y101;
+    #print(1) => y102;
+    #record-read(y99, "skip") => y103;
+    y103( )

@@ -11,89 +11,104 @@ primitives
   expression #int-sub(@value, @value)
   expression #int-mul(@value, @value)
   expression #int-div(@value, @value)
+  expression #record-new()
+  expression #record-read(@value, @value)
+  expression #record-write(@value, @value, @value)
   conditional #int-eq(@value, @value)
+
+signature
+constructors
+  String : STRING -> Value
 
 rules
   evalProgram :: 'Start -> Holy
-  
-  evalStatements :: List('Statement) * @value -> @statement
-  
-  evalStatement :: 'Statement -> Holy
-  
-  evalExpression :: 'Expression -> Holy(@value)
-  
-  evalLabels :: List('Statement) * @value -> Holy
-  
-  evalCondition :: 'Condition * @value * @value -> @statement
+
+  evalStatements :: @value * List('Statement) * @value -> @statement
+
+  evalStatement :: @value * 'Statement -> Holy
+
+  evalExpression :: @value * 'Expression -> Holy(@value)
+
+  evalExpressions :: @value * List('Expression) -> Holy(List(@value))
+
+  makeParamVars :: List('ID) -> List(@value)
+
+  evalParameters :: @value * List('ID) * List(@value) -> Holy
+
+  evalLabels :: @value * List('Statement) * @value -> Holy
+
+  evalCondition :: @value * 'Condition * @value * @value -> @statement
 
   evalProgram(Program(l)) = {
-    evalLabels(l, exit)
-    evalStatements(l, exit)
+    s <- #record-new()
+    evalLabels(s, l, exit)
+    evalStatements(s, l, exit)
   }
   label exit/0:
-  
-  evalLabels([Label(l)|s], exit) = {
-  	v <- var(l)
-  	fix {
-  	  fun v([]) = {
-  	    evalStatements(s, exit)
-  	  }
-  	}
-  	evalLabels(s, exit)
-  }
-  evalLabels([_|s], exit) = evalLabels(s, exit)
-  evalLabels([], _) = hole
 
-  evalStatements([a|b], exit) = {
-    evalStatement(a)
-    evalStatements(b, exit)
+  evalLabels(s, [Label(l)|sts], exit) = {
+    v <- var(l)
+    fix {
+      fun v([]) = {
+        evalStatements(s, sts, exit)
+      }
+    }
+    #record-write(s, str(l), v)
+    evalLabels(s, sts, exit)
   }
-  
-  evalStatements([Label(l)|_], exit) = {
+  evalLabels(s, [_|sts], exit) = evalLabels(s, sts, exit)
+  evalLabels(s, [], _) = hole
+
+  evalStatements(s, [a|b], exit) = {
+    evalStatement(s, a)
+    evalStatements(s, b, exit)
+  }
+
+  evalStatements(s, [Label(l)|_], exit) = {
     v <- var(l)
     v@([])
   }
-  
-  evalStatements([], exit) = exit@([])
-  
-  evalStatement(Print(e)) = {
-    x <- evalExpression(e)
+
+  evalStatements(s, [], exit) = exit@([])
+
+  evalStatement(s, Print(e)) = {
+    x <- evalExpression(s, e)
     #print(x)
   }
-  
-  evalStatement(Simple(e)) = {
-    evalExpression(e)
+
+  evalStatement(s, Simple(e)) = {
+    evalExpression(s, e)
   }
-  
-  evalStatement(Assign(Variablee(x), e)) = {
-    v <- evalExpression(e)
-    t <- var(x)
-    let t = v in
-      hole
+
+  evalStatement(s, Assign(Variablee(x), e)) = {
+    v <- evalExpression(s, e)
+    #record-write(s, str(x), v)
   }
-  
-  evalStatements([Jump(x)|_], exit) = {
-    var(x)@([])
+
+  evalStatements(s, [Jump(x)|_], exit) = {
+    lab <- #record-read(s, str(x))
+    lab@([])
   }
-  
-  evalStatement(Jump(x)) = {
-    var(x)@([])
+
+  evalStatement(s, Jump(x)) = {
+    lab <- #record-read(s, str(x))
+    lab@([])
     label noop/0:
   }
-  
-  evalStatement(If(c, s)) = {
+
+  evalStatement(s, If(c, st)) = {
     true <- fresh-var(true)
-  	fix {
+    fix {
       fun true([]) = {
-        evalStatement(s)
+        evalStatement(s, st)
         cont@([])
       }
-  	}
-  	evalCondition(c, true, cont)
+    }
+    evalCondition(s, c, true, cont)
   } label cont/0:
-  
-  evalCondition(Zero(e), true, false) = {
-    v <- evalExpression(e)
+
+  evalCondition(s, Zero(e), true, false) = {
+    v <- evalExpression(s, e)
     if #int-eq(v, int('0)) then {
       true@([])
     } else {
@@ -101,52 +116,72 @@ rules
     }
   }
 
-  evalExpression(Value(Int(i))) = int(i)
-  
-  evalExpression(Variable(Variablee(x))) = var(x)
-  
-  evalExpression(Add(e1, e2)) = {
-    v1 <- evalExpression(e1)
-    v2 <- evalExpression(e2)
+  evalExpression(s, Value(Int(i))) = int(i)
+
+  evalExpression(s, Value(String(x))) = str(x)
+
+  evalExpression(s, Variable(Variablee(x))) = #record-read(s, str(x))
+
+  evalExpression(s, Add(e1, e2)) = {
+    v1 <- evalExpression(s, e1)
+    v2 <- evalExpression(s, e2)
     #int-add(v1, v2)
   }
-  
-  evalExpression(Sub(e1, e2)) = {
-    v1 <- evalExpression(e1)
-    v2 <- evalExpression(e2)
+
+  evalExpression(s, Sub(e1, e2)) = {
+    v1 <- evalExpression(s, e1)
+    v2 <- evalExpression(s, e2)
     #int-sub(v1, v2)
   }
-  
-  evalExpression(Mul(e1, e2)) = {
-    v1 <- evalExpression(e1)
-    v2 <- evalExpression(e2)
+
+  evalExpression(s, Mul(e1, e2)) = {
+    v1 <- evalExpression(s, e1)
+    v2 <- evalExpression(s, e2)
     #int-mul(v1, v2)
   }
-  
-  evalExpression(Div(e1, e2)) = {
-    v1 <- evalExpression(e1)
-    v2 <- evalExpression(e2)
+
+  evalExpression(s, Div(e1, e2)) = {
+    v1 <- evalExpression(s, e1)
+    v2 <- evalExpression(s, e2)
     #int-div(v1, v2)
   }
 
-  evalExpression(Lambda(Variablee(v), e)) = {
+  evalExpression(s, Lambda(paramNames, e)) = {
     lambda <- fresh-var(lambda)
     tail <- fresh-var(tail)
-    t <- var(v)
+    params <- makeParamVars(paramNames)
     fix {
-      fun lambda([t, tail]) = {
-        r <- evalExpression(e)
+      fun lambda(params ++ [tail]) = {
+        evalParameters(s, paramNames, params)
+        r <- evalExpression(s, e)
         tail@([r])
       }
     }
     lambda
   }
-  
-  evalExpression(Apply(e1, e2)) = {
-    f <- evalExpression(e1)
-    arg <- evalExpression(e2)
-    
-    f@([arg, ret])
+
+  makeParamVars([h|t]) = [fresh-var(p)|makeParamVars(t)]
+  makeParamVars([]) = []
+
+  evalParameters(s, [name|nl], [param|pl]) = {
+    #record-write(s, str(name), param)
+    evalParameters(s, nl, pl)
+  }
+
+  evalParameters(s, [], []) = hole
+
+  evalExpression(s, Apply(e1, es)) = {
+    f <- evalExpression(s, e1)
+    arg <- evalExpressions(s, es)
+
+    f@(arg ++ [ret])
     label ret/1:
   }
+
+  evalExpressions(s, [e| es]) = {
+    v1 <- evalExpression(s, e)
+    vs <- evalExpressions(s, es)
+    [v1|vs]
+  }
+  evalExpressions(s, []) = []
 
