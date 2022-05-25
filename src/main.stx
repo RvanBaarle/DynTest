@@ -2,9 +2,132 @@ module main
 
 imports
 
+  statics/types
   signatures/start-sig
+
+signature
+  name-resolution 
+    labels P
+  relations
+    var : ID -> TYPE
 
 rules
 
   programOk : Start
-  programOk(_).
+
+  statementOk : scope * Statement
+  statementsOk maps statementOk(*, list(*))
+  conditionOk : scope * Condition
+  elseOk : scope * Else
+  
+  typeOfExp : scope * Expression -> TYPE
+  typeOfExps maps typeOfExp(*, list(*)) = list(*)
+  typeOfLiteral : scope * Value -> TYPE
+  
+  programOk(Program(stmts)) :- {s}
+    new s,
+    statementsOk(s, stmts).
+
+  statementOk(s, Simple(e)) :-
+    typeOfExp(s, e) == _.
+
+  statementOk(s, Print(e)) :-
+    printable(typeOfExp(s, e)).
+  
+  statementOk(s, Assign(Variablee(x), e)) :- {T}
+    declareVar(s, x, T),
+    typeOfExp(s, e) == T.
+
+  statementOk(s, Jump(x)) :-
+    resolveVar(s, x) == LBL().
+
+  statementOk(s, Label(x)) :-
+    declareVar(s, x, LBL()).
+
+  statementOk(s, If(c, stmts, e)) :-
+    conditionOk(s, c),
+    statementsOk(s, stmts),
+    elseOk(s, e).
+
+  conditionOk(s, Zero(e)) :-
+    typeOfExp(s, e) == INT().
+
+  elseOk(s, NoElse()).
+  elseOk(s, Elif(c, stmts, e)) :-
+    conditionOk(s, c),
+    statementsOk(s, stmts),
+    elseOk(s, e).
+  elseOk(s, Else(stmts)) :-
+    statementsOk(s, stmts).
+
+  typeOfExp(s, v@Value(x)) = T :-
+    typeOfLiteral(s, x) == T,
+    @v.type := T.
+  typeOfExp(s, v@Variable(Variablee(x))) = T :-
+    resolveVar(s, x) == T,
+    @v.type := T.
+  
+  typeOfExp(s, x@Add(e1, e2)) = INT() :-
+    typeOfExp(s, e1) == INT(),
+    typeOfExp(s, e2) == INT(),
+    @x.type := INT().
+  
+  typeOfExp(s, x@Sub(e1, e2)) = INT() :-
+    typeOfExp(s, e1) == INT(),
+    typeOfExp(s, e2) == INT(),
+    @x.type := INT().
+  
+  typeOfExp(s, x@Mul(e1, e2)) = INT() :-
+    typeOfExp(s, e1) == INT(),
+    typeOfExp(s, e2) == INT(),
+    @x.type := INT().
+  
+  typeOfExp(s, x@Div(e1, e2)) = INT() :-
+    typeOfExp(s, e1) == INT(),
+    typeOfExp(s, e2) == INT(),
+    @x.type := INT().
+  
+  typeOfExp(s, x@Apply(e1, es)) = Tr :- {Tp}
+    typeOfExp(s, e1) == FUN(Tr, Tp),
+    typeOfExps(s, es) == Tp,
+    @x.type := Tr.
+
+  typeOfExp(s, x@Lambda(args, e)) = T@FUN(Tr, Tp) :- {s_l}
+    new s_l, s_l-P->s,
+    declareVars(s_l, args, Tp),
+    typeOfExp(s_l, e) == Tr,
+    @x.type := T.
+
+  typeOfLiteral(s, Int(_)) = INT().
+  typeOfLiteral(s, String(_)) = STR().
+
+rules
+
+  resolveVar : scope * ID -> TYPE
+  declareVar : scope * ID * TYPE
+  declareVars maps declareVar(*, list(*), list(*))
+  reassignsOk : list((path * (ID * TYPE)))
+  
+  declareVar(s, x, T) :- {ps}
+    !var[x, T] in s,
+    query var
+      filter P* and { x' :- x' == x }
+        min $ < P and true
+          in s |-> ps,
+    reassignsOk(ps) | error $[Assignments of different types to variable [x]].
+  
+  reassignsOk([a, b|t]) :- {T}
+    a == (_, (_, T)),
+    b == (_, (_, T)),
+    reassignsOk([b|t]).
+  reassignsOk([_]).
+  reassignsOk([]).
+
+  resolveVar(s, x) = T :- {x'}
+    query var
+      filter P* and { x'' :- x'' == x }
+        min $ < P and true
+          in s |-> [(_, (x', T))|_],
+    @x.ref := x'.
+
+  

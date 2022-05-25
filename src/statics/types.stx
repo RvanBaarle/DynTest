@@ -1,0 +1,14 @@
+module statics/types
+
+signature
+  sorts TYPE
+  constructors
+    INT : TYPE
+    STR : TYPE
+    FUN : TYPE * list(TYPE) -> TYPE
+    LBL : TYPE
+
+rules
+  printable : TYPE
+  printable(INT()).
+  printable(STR()).
