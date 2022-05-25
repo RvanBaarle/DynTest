@@ -23,7 +23,7 @@ constructors
 rules
   evalProgram :: 'Start -> Holy
 
-  evalStatements :: @value * List('Statement) * @value -> @statement
+  evalStatements :: @value * List('Statement) -> @statement
 
   evalStatement :: @value * 'Statement -> Holy
 
@@ -35,41 +35,45 @@ rules
 
   evalParameters :: @value * List('ID) * List(@value) -> Holy
 
-  evalLabels :: @value * List('Statement) * @value -> Holy
+  evalLabels :: @value * List('Statement) -> Holy
 
   evalCondition :: @value * 'Condition * @value * @value -> @statement
 
   evalProgram(Program(l)) = {
-    s <- #record-new()
-    evalLabels(s, l, exit)
-    evalStatements(s, l, exit)
+    let var('"_exit") = exit in {
+      s <- #record-new()
+      evalLabels(s, l)
+      evalStatements(s, l)
+    }
   }
   label exit/0:
 
-  evalLabels(s, [Label(l)|sts], exit) = {
+  evalLabels(s, [Label(l)|sts]) = {
     v <- var(l)
     fix {
       fun v([]) = {
-        evalStatements(s, sts, exit)
+        evalStatements(s, sts)
       }
     }
     #record-write(s, str(l), v)
-    evalLabels(s, sts, exit)
+    evalLabels(s, sts)
   }
-  evalLabels(s, [_|sts], exit) = evalLabels(s, sts, exit)
-  evalLabels(s, [], _) = hole
+  evalLabels(s, [_|sts]) = evalLabels(s, sts)
+  evalLabels(s, []) = hole
 
-  evalStatements(s, [a|b], exit) = {
+  evalStatements(s, [a|b]) = {
     evalStatement(s, a)
-    evalStatements(s, b, exit)
+    evalStatements(s, b)
   }
 
-  evalStatements(s, [Label(l)|_], exit) = {
+  evalStatements(s, [Label(l)|_]) = {
     v <- var(l)
     v@([])
   }
 
-  evalStatements(s, [], exit) = exit@([])
+  evalStatements(s, []) = {
+    var('"_exit")@([])
+  }
 
   evalStatement(s, Print(e)) = {
     x <- evalExpression(s, e)
@@ -85,7 +89,7 @@ rules
     #record-write(s, str(x), v)
   }
 
-  evalStatements(s, [Jump(x)|_], exit) = {
+  evalStatements(s, [Jump(x)|_]) = {
     lab <- #record-read(s, str(x))
     lab@([])
   }

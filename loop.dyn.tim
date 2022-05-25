@@ -1,41 +1,42 @@
 fix {
-  fun k24( ) =
+  fun k26( ) =
     #exit( )
 } in
-  #record-new( ) => y104;
-  fix {
-    fun loop( ) =
-      #record-read(y104, "a") => y105;
-      #int-sub(y105, 1) => y106;
-      #record-write(y104, "a", y106) => y107;
-      #record-read(y104, "a") => y108;
-      #print(y108) => y109;
-      fix {
-        fun k25( ) =
-          #record-read(y104, "loop") => y112;
-          y112( )
-      } in
-        fix {
-          fun true1( ) =
-            #record-read(y104, "end") => y110;
-            fix {
-              fun k26( ) =
-                k25( )
-            } in
-              y110( )
-        } in
-          #record-read(y104, "a") => y111;
-          if #int-eq(y111, 0) then
-            true1( )
-          else
-            k25( )
-  } in
-    #record-write(y104, "loop", loop) => y113;
+  let _exit = k26 in
+    #record-new( ) => y114;
     fix {
-      fun end( ) =
-        #print(2147483647) => y114;
-        k24( )
+      fun loop( ) =
+        #record-read(y114, "a") => y115;
+        #int-sub(y115, 1) => y116;
+        #record-write(y114, "a", y116) => y117;
+        #record-read(y114, "a") => y118;
+        #print(y118) => y119;
+        fix {
+          fun k27( ) =
+            #record-read(y114, "loop") => y122;
+            y122( )
+        } in
+          fix {
+            fun true6( ) =
+              #record-read(y114, "end") => y120;
+              fix {
+                fun k28( ) =
+                  k27( )
+              } in
+                y120( )
+          } in
+            #record-read(y114, "a") => y121;
+            if #int-eq(y121, 0) then
+              true6( )
+            else
+              k27( )
     } in
-      #record-write(y104, "end", end) => y115;
-      #record-write(y104, "a", 100) => y116;
-      loop( )
+      #record-write(y114, "loop", loop) => y123;
+      fix {
+        fun end( ) =
+          #print(2147483647) => y124;
+          _exit( )
+      } in
+        #record-write(y114, "end", end) => y125;
+        #record-write(y114, "a", 100) => y126;
+        loop( )
