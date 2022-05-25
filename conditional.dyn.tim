@@ -1,0 +1,43 @@
+fix {
+  fun k39( ) =
+    #exit( )
+} in
+  let _exit = k39 in
+    #record-new( ) => y193;
+    #record-write(y193, "a", 10) => y194;
+    #record-write(y193, "b", 12) => y195;
+    fix {
+      fun k42( ) =
+        #print("Goodbye") => y205;
+        k39( )
+    } in
+      fix {
+        fun el5( ) =
+          #print(6) => y196;
+          #print(11) => y197;
+          k42( )
+      } in
+        fix {
+          fun true18( ) =
+            #print(500) => y198;
+            #print(6) => y199;
+            k42( )
+          fun elif5( ) =
+            #record-read(y193, "b") => y200;
+            if #int-eq(y200, 0) then
+              true18( )
+            else
+              el5( )
+        } in
+          fix {
+            fun true17( ) =
+              #print(5) => y201;
+              #print(6) => y202;
+              #print(6) => y203;
+              k42( )
+          } in
+            #record-read(y193, "a") => y204;
+            if #int-eq(y204, 0) then
+              true17( )
+            else
+              elif5( )

@@ -9,7 +9,7 @@ context-free start-symbols
 
 context-free sorts
 
-  Start Statement Expression Value Variable Condition
+  Start Statement Expression Value Variable Condition Else
 
 context-free syntax
 
@@ -31,11 +31,22 @@ context-free syntax
   Statement.Assign = <<Variable> = <Expression>>
   Statement.Simple = <<Expression>>
   Statement.Jump = <goto <ID>>
+  Statement.Label = <<ID>:>
   Statement.If = <
     if <Condition> then
-      <s:Statement>
-  > {layout(indent "if" s)}
-  Statement.Label = <<ID>:>
+      <s:Statement*>
+    <e:Else>
+  > {layout(indent "if" s && align-list s && align "if" e)}
+  Else.Elif = <
+    elif <Condition> then
+      <s:Statement*>
+    <e:Else>
+  > {layout(indent "elif" s && align-list s && align "elif" e)}
+  Else.Else = <
+    else
+      <s:Statement*>
+  > {layout(indent "else" s && align-list s)}
+  Else.NoElse =
 
   Condition.Zero = <<Expression> is zero>
 

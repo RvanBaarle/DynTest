@@ -1,42 +1,54 @@
 fix {
-  fun k26( ) =
+  fun k68( ) =
     #exit( )
 } in
-  let _exit = k26 in
-    #record-new( ) => y114;
+  let _exit = k68 in
+    #record-new( ) => y309;
     fix {
       fun loop( ) =
-        #record-read(y114, "a") => y115;
-        #int-sub(y115, 1) => y116;
-        #record-write(y114, "a", y116) => y117;
-        #record-read(y114, "a") => y118;
-        #print(y118) => y119;
+        #record-read(y309, "a") => y310;
+        #int-sub(y310, 1) => y311;
+        #record-write(y309, "a", y311) => y312;
+        #record-read(y309, "a") => y313;
+        #print(y313) => y314;
         fix {
-          fun k27( ) =
-            #record-read(y114, "loop") => y122;
-            y122( )
+          fun k69( ) =
+            fix {
+              fun k71( ) =
+                fix {
+                  fun k72( ) =
+                    _exit( )
+                } in
+                  end( )
+            } in
+              #record-read(y309, "loop") => y317;
+              y317( )
         } in
           fix {
-            fun true6( ) =
-              #record-read(y114, "end") => y120;
+            fun true27( ) =
               fix {
-                fun k28( ) =
-                  k27( )
+                fun k70( ) =
+                  k69( )
               } in
-                y120( )
+                #record-read(y309, "end") => y315;
+                y315( )
           } in
-            #record-read(y114, "a") => y121;
-            if #int-eq(y121, 0) then
-              true6( )
+            #record-read(y309, "a") => y316;
+            if #int-eq(y316, 0) then
+              true27( )
             else
-              k27( )
+              k69( )
     } in
-      #record-write(y114, "loop", loop) => y123;
+      #record-write(y309, "loop", loop) => y318;
       fix {
         fun end( ) =
-          #print(2147483647) => y124;
+          #print(2147483647) => y319;
           _exit( )
       } in
-        #record-write(y114, "end", end) => y125;
-        #record-write(y114, "a", 100) => y126;
-        loop( )
+        #record-write(y309, "end", end) => y320;
+        #record-write(y309, "a", 100) => y321;
+        fix {
+          fun k73( ) =
+            k68( )
+        } in
+          loop( )

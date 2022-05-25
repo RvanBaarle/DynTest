@@ -1,0 +1,13 @@
+a = 10
+b = 12
+if a is zero then
+  print(5)
+  print(6)
+  print(6)
+elif b is zero then
+  print(500)
+  print(6)
+else
+  print(6)
+  print(11)
+print("Goodbye")
