@@ -1,31 +1,31 @@
 fix {
-  fun k21( ) =
+  fun k66( ) =
     #exit( )
 } in
-  #record-new( ) => y81;
+  #record-new( ) => y305;
   fix {
-    fun lambda8(p419, p420, p421, tail16) =
-      #record-write(y81, "a", p419) => y82;
-      #record-write(y81, "b", p420) => y83;
-      #record-write(y81, "x", p421) => y84;
-      #record-read(y81, "a") => y85;
-      #record-read(y81, "x") => y86;
-      #int-mul(y85, y86) => y87;
-      #record-read(y81, "b") => y88;
-      #int-add(y87, y88) => y89;
-      tail16(y89)
+    fun lambda0(p410, p411, p412, tail0) =
+      #record-write(y305, "a", p410) => y306;
+      #record-write(y305, "b", p411) => y307;
+      #record-write(y305, "x", p412) => y308;
+      #record-read(y305, "a") => y330;
+      #record-read(y305, "x") => y331;
+      #int-mul(y330, y331) => y332;
+      #record-read(y305, "b") => y333;
+      #int-add(y332, y333) => y334;
+      tail0(y334)
   } in
-    #record-write(y81, "f", lambda8) => y90;
-    #record-read(y81, "f") => y91;
+    #record-write(y305, "f", lambda0) => y335;
+    #record-read(y305, "f") => y336;
     fix {
-      fun k22(a151) =
-        #print(a151) => y92;
-        #record-read(y81, "a") => y93;
-        #print(y93) => y94;
-        #record-read(y81, "b") => y95;
-        #print(y95) => y96;
-        #record-read(y81, "x") => y97;
-        #print(y97) => y98;
-        k21( )
+      fun k67(a146) =
+        #print(a146) => y337;
+        #record-read(y305, "a") => y338;
+        #print(y338) => y339;
+        #record-read(y305, "b") => y340;
+        #print(y340) => y341;
+        #record-read(y305, "x") => y342;
+        #print(y342) => y343;
+        k66( )
     } in
-      y91(5, 6, 7, k22)
+      y336(5, 6, 7, k67)

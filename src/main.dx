@@ -21,6 +21,8 @@ constructors
   String : STRING -> Value
 
 rules
+  $exit :: @value
+
   evalProgram :: 'Start -> Holy
 
   evalStatements :: @value * List('Statement) -> Holy
@@ -42,11 +44,11 @@ rules
   evalElse :: @value * 'Else * @value -> Holy(@value)
 
   evalProgram(Program(l)) = {
-    let var('"_exit") = exit in {
+    with $exit = exit do {
       s <- #record-new()
       evalLabels(s, l)
       evalStatements(s, l)
-      exit@([])
+      $exit@([])
     }
   }
   label exit/0:
@@ -57,7 +59,7 @@ rules
     fix {
       fun v([]) = {
         evalStatements(s, sts)
-        var('"_exit")@([])
+        $exit@([])
       }
     }
     #record-write(s, str(l), v)

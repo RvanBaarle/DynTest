@@ -1,5 +1,5 @@
 a = 10
-b = 12
+b = 0
 if a is zero then
   print(5)
   print(6)

@@ -1,42 +1,18 @@
 fix {
-  fun k84( ) =
+  fun k81( ) =
     #exit( )
 } in
-  let _exit = k84 in
-    #record-new( ) => y349;
+  #record-new( ) => y365;
+  fix {
+    fun skip( ) =
+      #print(3) => y366;
+      k81( )
+  } in
+    #record-write(y365, "skip", skip) => y367;
+    #print(1) => y368;
     fix {
-      fun skip( ) =
-        #print(3) => y350;
-        _exit( )
+      fun k82( ) =
+        k81( )
     } in
-      #record-write(y349, "skip", skip) => y351;
-      fix {
-        fun label2( ) =
-          fix {
-            fun k85( ) =
-              #print(2) => y353;
-              fix {
-                fun k86( ) =
-                  _exit( )
-              } in
-                skip( )
-          } in
-            #record-read(y349, "skip") => y352;
-            y352( )
-      } in
-        #record-write(y349, "label2", label2) => y354;
-        fix {
-          fun label1( ) =
-            fix {
-              fun k87( ) =
-                _exit( )
-            } in
-              label2( )
-        } in
-          #record-write(y349, "label1", label1) => y355;
-          #print(1) => y356;
-          fix {
-            fun k88( ) =
-              k84( )
-          } in
-            label1( )
+      #record-read(y365, "skip") => y369;
+      y369( )

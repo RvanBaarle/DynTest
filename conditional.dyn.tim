@@ -1,43 +1,42 @@
 fix {
-  fun k39( ) =
+  fun k79( ) =
     #exit( )
 } in
-  let _exit = k39 in
-    #record-new( ) => y193;
-    #record-write(y193, "a", 10) => y194;
-    #record-write(y193, "b", 12) => y195;
+  #record-new( ) => y344;
+  #record-write(y344, "a", 10) => y345;
+  #record-write(y344, "b", 0) => y346;
+  fix {
+    fun k80( ) =
+      #print("Goodbye") => y364;
+      k79( )
+  } in
     fix {
-      fun k42( ) =
-        #print("Goodbye") => y205;
-        k39( )
+      fun el9( ) =
+        #print(6) => y347;
+        #print(11) => y348;
+        k80( )
     } in
       fix {
-        fun el5( ) =
-          #print(6) => y196;
-          #print(11) => y197;
-          k42( )
+        fun true30( ) =
+          #print(500) => y357;
+          #print(6) => y358;
+          k80( )
+        fun elif9( ) =
+          #record-read(y344, "b") => y359;
+          if #int-eq(y359, 0) then
+            true30( )
+          else
+            el9( )
       } in
         fix {
-          fun true18( ) =
-            #print(500) => y198;
-            #print(6) => y199;
-            k42( )
-          fun elif5( ) =
-            #record-read(y193, "b") => y200;
-            if #int-eq(y200, 0) then
-              true18( )
-            else
-              el5( )
+          fun true29( ) =
+            #print(5) => y360;
+            #print(6) => y361;
+            #print(6) => y362;
+            k80( )
         } in
-          fix {
-            fun true17( ) =
-              #print(5) => y201;
-              #print(6) => y202;
-              #print(6) => y203;
-              k42( )
-          } in
-            #record-read(y193, "a") => y204;
-            if #int-eq(y204, 0) then
-              true17( )
-            else
-              elif5( )
+          #record-read(y344, "a") => y363;
+          if #int-eq(y363, 0) then
+            true29( )
+          else
+            elif9( )

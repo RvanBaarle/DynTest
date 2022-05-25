@@ -1,54 +1,49 @@
 fix {
-  fun k68( ) =
+  fun k61( ) =
     #exit( )
 } in
-  let _exit = k68 in
-    #record-new( ) => y309;
+  #record-new( ) => y292;
+  fix {
+    fun end( ) =
+      #print(2147483647) => y293;
+      k61( )
+  } in
+    #record-write(y292, "end", end) => y294;
     fix {
       fun loop( ) =
-        #record-read(y309, "a") => y310;
-        #int-sub(y310, 1) => y311;
-        #record-write(y309, "a", y311) => y312;
-        #record-read(y309, "a") => y313;
-        #print(y313) => y314;
+        #record-read(y292, "a") => y295;
+        #int-sub(y295, 1) => y296;
+        #record-write(y292, "a", y296) => y297;
+        #record-read(y292, "a") => y298;
+        #print(y298) => y299;
         fix {
-          fun k69( ) =
+          fun k62( ) =
             fix {
-              fun k71( ) =
-                fix {
-                  fun k72( ) =
-                    _exit( )
-                } in
-                  end( )
+              fun k64( ) =
+                k61( )
             } in
-              #record-read(y309, "loop") => y317;
-              y317( )
+              #record-read(y292, "loop") => y302;
+              y302( )
         } in
           fix {
-            fun true27( ) =
+            fun true28( ) =
               fix {
-                fun k70( ) =
-                  k69( )
+                fun k63( ) =
+                  k62( )
               } in
-                #record-read(y309, "end") => y315;
-                y315( )
+                #record-read(y292, "end") => y300;
+                y300( )
           } in
-            #record-read(y309, "a") => y316;
-            if #int-eq(y316, 0) then
-              true27( )
+            #record-read(y292, "a") => y301;
+            if #int-eq(y301, 0) then
+              true28( )
             else
-              k69( )
+              k62( )
     } in
-      #record-write(y309, "loop", loop) => y318;
+      #record-write(y292, "loop", loop) => y303;
+      #record-write(y292, "a", 100) => y304;
       fix {
-        fun end( ) =
-          #print(2147483647) => y319;
-          _exit( )
+        fun k65( ) =
+          k61( )
       } in
-        #record-write(y309, "end", end) => y320;
-        #record-write(y309, "a", 100) => y321;
-        fix {
-          fun k73( ) =
-            k68( )
-        } in
-          loop( )
+        loop( )
