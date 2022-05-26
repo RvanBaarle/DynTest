@@ -106,9 +106,10 @@ rules
     evalExpression(e)
   }
 
-  evalStatement(Assign(Variablee(x), e)) = {
+  evalStatement(Assign(Variablee(_, x), e)) = {
     v <- evalExpression(e)
-    #record-write($scope, str(x), v)
+    s <- evalPath($scope, unpackPath(path(x)))
+    #record-write(s, str(x), v)
   }
 
   evalStatements([Jump(x)|_]) = {
@@ -119,7 +120,8 @@ rules
   label noop/0:
 
   evalStatement(Jump(x)) = {
-    lab <- #record-read($scope, str(x))
+    s <- evalPath($scope, unpackPath(path(x)))
+    lab <- #record-read(s, str(x))
     lab@([])
   }
   label noop/0:
@@ -175,7 +177,10 @@ rules
   evalStatement(VarScope(stmts)) = {
     s <- #record-new()
     #record-write(s, str('"main!P"), $scope)
-    with $scope = s do evalStatements(stmts)
+    with $scope = s do {
+      evalJumpLabels(stmts)
+      evalStatements(stmts)
+    }
     hole
   }
 
@@ -183,7 +188,7 @@ rules
 
   evalExpression(Value(String(x))) = str(x)
 
-  evalExpression(Variable(Variablee(x))) = {
+  evalExpression(Variable(Variablee(_, x))) = {
     s <- evalPath($scope, unpackPath(path(x)))
     #record-read(s, str(x))
   }

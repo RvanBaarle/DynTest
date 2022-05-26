@@ -9,11 +9,20 @@ context-free start-symbols
 
 context-free sorts
 
-  Start Statement Expression Value Variable Condition Else
+  Start
+  Statement
+  Expression
+  Value
+  Variable
+  Condition
+  Else
+  AccessModifier
 
 context-free syntax
 
-  Variable.Variablee = <<ID>>
+  Start.Program = <<s:Statement*>> {layout(align-list s)}
+
+  Variable.Variablee = <<AccessModifier><ID>>
   Value.Int = <<INT>>
 
   Expression.Value = <<Value>>
@@ -55,7 +64,9 @@ context-free syntax
 
   Condition.Zero = <<Expression> is zero>
 
-  Start.Program = <<s:Statement*>> {layout(align-list s)}
+  AccessModifier.Local =
+  AccessModifier.NonLocal = <nonlocal >
+  AccessModifier.Global = <global >
 
 syntax
   Value-CF.String = "\"" STRING-CF "\""

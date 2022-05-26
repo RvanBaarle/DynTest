@@ -1,4 +1,20 @@
-// a = "hello"
-a = 5
-// a = "a"
-a + 5
+a = 55
+b = "hello"
+{
+  a = "aword"
+  b = 506
+  {
+    a = 66
+    b = "not 506"
+    print(a)
+    print(b)
+    print(global a)
+    print(nonlocal b)
+    global a = 77
+    nonlocal b = nonlocal b + 1
+  }
+  print(a)
+  print(b)
+}
+print(a)
+print(b)

@@ -1,3 +1,129 @@
 module test
 
-test parse empty [[]] parse succeeds
+test lambda [[
+a = 55
+z = 200
+x = "hello"
+f = a, b, x -> ((a * x) + z)
+g = x -> x
+print(g("hi"))
+print(f(5, 6, 7))
+print(a)
+print(x)
+]] transform "Compile and execute using Dynamix" to 
+"hi
+235
+55
+hello
+"
+
+test loop [[
+a = 20
+loop:
+a = a - 1
+print(a)
+if a is zero then
+  goto end
+goto loop
+end:
+print("Goodbye")
+]] transform "Compile and execute using Dynamix" to 
+"19
+18
+17
+16
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+Goodbye
+"
+
+test scopes [[
+a = 55
+b = "hello"
+x = 66
+{
+  a = 1000
+  {
+    b = 42
+    print(a)
+    print(b)
+  }
+  print(a)
+  print(b)
+}
+{{{{
+  x = 42
+  print(a)
+  print(b)
+  print(x)
+}}}}
+print(a)
+print(b)
+print(x)
+]] transform "Compile and execute using Dynamix" to 
+"1000
+42
+1000
+hello
+55
+hello
+42
+55
+hello
+66
+"
+
+test conditional [[
+a = 10
+b = 0
+if a is zero then
+  print(5)
+  print(6)
+  print(6)
+elif b is zero then
+  print(500)
+  print(6)
+else
+  print(6)
+  print(11)
+print("Goodbye")
+]] transform "Compile and execute using Dynamix" to
+"500
+6
+Goodbye
+"
+
+test scoped labels [[
+print(1)
+{
+  print(2)
+  goto hello
+  print(-1)
+  hello:
+  print(3)
+  goodbye:
+  goto exit
+  print(4)
+}
+exit:
+print(5)
+]] transform "Compile and execute using Dynamix" to
+"1
+2
+3
+5
+"

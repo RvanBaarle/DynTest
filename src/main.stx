@@ -19,6 +19,8 @@ rules
   statementsOk maps statementOk(*, list(*))
   conditionOk : scope * Condition
   elseOk : scope * Else
+  noLabelOk : Statement
+  noLabelsOk maps noLabelOk(list(*))
   
   typeOfExp : scope * Expression -> TYPE
   typeOfExps maps typeOfExp(*, list(*)) = list(*)
@@ -34,8 +36,16 @@ rules
   statementOk(s, Print(e)) :-
     printable(typeOfExp(s, e)).
   
-  statementOk(s, Assign(Variablee(x), e)) :- {T}
+  statementOk(s, Assign(Variablee(Local(), x), e)) :- {T}
     declareVar(s, x, T),
+    typeOfExp(s, e) == T.
+  
+  statementOk(s, Assign(Variablee(NonLocal(), x), e)) :- {T}
+    resolveNonLocalVar(s, x) == T,
+    typeOfExp(s, e) == T.
+  
+  statementOk(s, Assign(Variablee(Global(), x), e)) :- {T}
+    resolveGlobalVar(s, x) == T,
     typeOfExp(s, e) == T.
 
   statementOk(s, Jump(x)) :-
@@ -44,8 +54,13 @@ rules
   statementOk(s, JumpLabel(x)) :-
     declareVar(s, x, LBL()).
 
+  noLabelOk(_).
+  noLabelOk(JumpLabel(_)) :-
+    false.
+
   statementOk(s, If(c, stmts, e)) :-
     conditionOk(s, c),
+    noLabelsOk(stmts) | error $[Labels not allowed in conditional branch],
     statementsOk(s, stmts),
     elseOk(s, e).
 
@@ -55,9 +70,11 @@ rules
   elseOk(s, NoElse()).
   elseOk(s, Elif(c, stmts, e)) :-
     conditionOk(s, c),
+    noLabelsOk(stmts) | error $[Labels not allowed in conditional branch],
     statementsOk(s, stmts),
     elseOk(s, e).
   elseOk(s, Else(stmts)) :-
+    noLabelsOk(stmts) | error $[Labels not allowed in conditional branch],
     statementsOk(s, stmts).
 
   statementOk(s, VarScope(stmts)) :- {s_new}
@@ -67,8 +84,14 @@ rules
   typeOfExp(s, v@Value(x)) = T :-
     typeOfLiteral(s, x) == T,
     @v.type := T.
-  typeOfExp(s, v@Variable(Variablee(x))) = T :-
+  typeOfExp(s, v@Variable(Variablee(Local(), x))) = T :-
     resolveVar(s, x) == T,
+    @v.type := T.
+  typeOfExp(s, v@Variable(Variablee(NonLocal(), x))) = T :-
+    resolveNonLocalVar(s, x) == T,
+    @v.type := T.
+  typeOfExp(s, v@Variable(Variablee(Global(), x))) = T :-
+    resolveGlobalVar(s, x) == T,
     @v.type := T.
   
   typeOfExp(s, x@Add(e1, e2)) = INT() :-
@@ -110,6 +133,8 @@ rules
   resolveVar : scope * ID -> TYPE
   declareVar : scope * ID * TYPE
   declareVars maps declareVar(*, list(*), list(*))
+  resolveGlobalVar : scope * ID -> TYPE
+  resolveNonLocalVar : scope * ID -> TYPE
   reassignsOk : list((path * (ID * TYPE)))
   
   declareVar(s, x, T) :- {ps}
@@ -118,8 +143,9 @@ rules
       filter P* and { x' :- x' == x }
         min $ < P and true
           in s |-> ps,
-    reassignsOk(ps) | error $[Assignments of different types to variable [x]].
-  
+    reassignsOk(ps) | error $[Assignments of different types to variable [x]],
+    @x.path := _PathEmpty(s).
+
   reassignsOk([a, b|t]) :- {T}
     a == (_, (_, T)),
     b == (_, (_, T)),
@@ -129,10 +155,31 @@ rules
 
   resolveVar(s, x) = T :- {p x'}
     query var
-      filter P* and { x'' :- x'' == x }
+      filter P* and eq(x)
         min $ < P and true
-          in s |-> [(p, (x', T))|_],
+          in s |-> [(p, (x', T)) | _] | error $[Undefined variable [x]],
     @x.ref := x',
     @x.path := p.
 
+  resolveGlobalVar(s, x) = T :- {s_global p x'}
+    query ()
+      filter P* and true
+        min P < $ and true
+          in s |-> [(p, s_global)],
+    query var
+      filter e and eq(x)
+        min and true
+          in s_global |-> [(_, (x', T)) | _] | error $[Undefined variable [x]],
+    @x.ref := x',
+    @x.path := p.
+
+  resolveNonLocalVar(s, x) = T :- {p x'}
+    query var
+      filter P+ and eq(x)
+        min $ < P and true
+          in s |-> [(p, (x', T)) | _] | error $[Undefined variable [x]],
+    @x.ref := x',
+    @x.path := p.
+
+  
   
