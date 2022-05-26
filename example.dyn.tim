@@ -1,18 +1,9 @@
 fix {
-  fun k81( ) =
+  fun k9( ) =
     #exit( )
 } in
-  #record-new( ) => y365;
-  fix {
-    fun skip( ) =
-      #print(3) => y366;
-      k81( )
-  } in
-    #record-write(y365, "skip", skip) => y367;
-    #print(1) => y368;
-    fix {
-      fun k82( ) =
-        k81( )
-    } in
-      #record-read(y365, "skip") => y369;
-      y369( )
+  #record-new( ) => y131;
+  #record-write(y131, "a", 5) => y132;
+  #record-read(y131, "a") => y133;
+  #int-add(y133, 5) => y134;
+  k9( )

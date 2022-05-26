@@ -1,0 +1,22 @@
+a = 55
+b = "hello"
+x = 66
+{
+  a = 1000
+  {
+    b = 42
+    print(a)
+    print(b)
+  }
+  print(a)
+  print(b)
+}
+{{{{
+  x = 42
+  print(a)
+  print(b)
+  print(x)
+}}}}
+print(a)
+print(b)
+print(x)

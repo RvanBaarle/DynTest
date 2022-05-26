@@ -1,0 +1,54 @@
+fix {
+  fun k7( ) =
+    #exit( )
+} in
+  #record-new( ) => y39;
+  #record-write(y39, "a", 55) => y40;
+  #record-write(y39, "b", "hello") => y41;
+  #record-write(y39, "x", 66) => y42;
+  #record-new( ) => y43;
+  #record-write(y43, "main!P", y39) => y44;
+  #record-write(y43, "a", 1000) => y45;
+  #record-new( ) => y46;
+  #record-write(y46, "main!P", y43) => y47;
+  #record-write(y46, "b", 42) => y48;
+  #record-read(y46, "main!P") => y49;
+  #record-read(y49, "a") => y50;
+  #print(y50) => y51;
+  #record-read(y46, "b") => y52;
+  #print(y52) => y53;
+  #record-read(y43, "a") => y54;
+  #print(y54) => y55;
+  #record-read(y43, "main!P") => y56;
+  #record-read(y56, "b") => y57;
+  #print(y57) => y58;
+  #record-new( ) => y59;
+  #record-write(y59, "main!P", y39) => y60;
+  #record-new( ) => y61;
+  #record-write(y61, "main!P", y59) => y105;
+  #record-new( ) => y106;
+  #record-write(y106, "main!P", y61) => y107;
+  #record-new( ) => y108;
+  #record-write(y108, "main!P", y106) => y109;
+  #record-write(y108, "x", 42) => y110;
+  #record-read(y108, "main!P") => y111;
+  #record-read(y111, "main!P") => y112;
+  #record-read(y112, "main!P") => y113;
+  #record-read(y113, "main!P") => y114;
+  #record-read(y114, "a") => y115;
+  #print(y115) => y116;
+  #record-read(y108, "main!P") => y117;
+  #record-read(y117, "main!P") => y118;
+  #record-read(y118, "main!P") => y119;
+  #record-read(y119, "main!P") => y120;
+  #record-read(y120, "b") => y121;
+  #print(y121) => y122;
+  #record-read(y108, "x") => y123;
+  #print(y123) => y124;
+  #record-read(y39, "a") => y125;
+  #print(y125) => y126;
+  #record-read(y39, "b") => y127;
+  #print(y127) => y128;
+  #record-read(y39, "x") => y129;
+  #print(y129) => y130;
+  k7( )

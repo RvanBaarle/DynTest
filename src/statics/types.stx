@@ -8,6 +8,12 @@ signature
     FUN : TYPE * list(TYPE) -> TYPE
     LBL : TYPE
 
+signature
+  sorts PATH
+  constructors
+    PathStep : PATH -> PATH
+    PathEmpty : PATH
+
 rules
   printable : TYPE
   printable(INT()).

@@ -1,31 +1,48 @@
 fix {
-  fun k66( ) =
+  fun k17( ) =
     #exit( )
 } in
-  #record-new( ) => y305;
+  #record-new( ) => y148;
+  #record-write(y148, "a", 55) => y149;
+  #record-write(y148, "z", 200) => y150;
+  #record-write(y148, "x", "hello") => y151;
   fix {
-    fun lambda0(p410, p411, p412, tail0) =
-      #record-write(y305, "a", p410) => y306;
-      #record-write(y305, "b", p411) => y307;
-      #record-write(y305, "x", p412) => y308;
-      #record-read(y305, "a") => y330;
-      #record-read(y305, "x") => y331;
-      #int-mul(y330, y331) => y332;
-      #record-read(y305, "b") => y333;
-      #int-add(y332, y333) => y334;
-      tail0(y334)
+    fun lambda2(p274, p275, p276, tail7) =
+      #record-new( ) => y152;
+      #record-write(y152, "main!P", y148) => y153;
+      #record-write(y152, "a", p274) => y164;
+      #record-write(y152, "b", p275) => y165;
+      #record-write(y152, "x", p276) => y166;
+      #record-read(y152, "a") => y167;
+      #record-read(y152, "x") => y168;
+      #int-mul(y167, y168) => y169;
+      #record-read(y152, "main!P") => y170;
+      #record-read(y170, "z") => y171;
+      #int-add(y169, y171) => y172;
+      tail7(y172)
   } in
-    #record-write(y305, "f", lambda0) => y335;
-    #record-read(y305, "f") => y336;
+    #record-write(y148, "f", lambda2) => y173;
     fix {
-      fun k67(a146) =
-        #print(a146) => y337;
-        #record-read(y305, "a") => y338;
-        #print(y338) => y339;
-        #record-read(y305, "b") => y340;
-        #print(y340) => y341;
-        #record-read(y305, "x") => y342;
-        #print(y342) => y343;
-        k66( )
+      fun lambda3(p277, tail8) =
+        #record-new( ) => y174;
+        #record-write(y174, "main!P", y148) => y175;
+        #record-write(y174, "x", p277) => y176;
+        #record-read(y174, "x") => y177;
+        tail8(y177)
     } in
-      y336(5, 6, 7, k67)
+      #record-write(y148, "g", lambda3) => y178;
+      #record-read(y148, "g") => y179;
+      fix {
+        fun k18(a146) =
+          #print(a146) => y180;
+          #record-read(y148, "f") => y181;
+          fix {
+            fun k19(a147) =
+              #print(a147) => y182;
+              #record-read(y148, "x") => y183;
+              #print(y183) => y184;
+              k17( )
+          } in
+            y181(5, 6, 7, k19)
+      } in
+        y179("hi", k18)

@@ -31,7 +31,7 @@ context-free syntax
   Statement.Assign = <<Variable> = <Expression>>
   Statement.Simple = <<Expression>>
   Statement.Jump = <goto <ID>>
-  Statement.Label = <<ID>:>
+  Statement.JumpLabel = <<ID>:>
   Statement.If = <
     if <Condition> then
       <s:Statement*>
@@ -47,6 +47,11 @@ context-free syntax
       <s:Statement*>
   > {layout(indent "else" s && align-list s)}
   Else.NoElse =
+  Statement.VarScope = <
+    {
+      <s:Statement*>    
+    }
+  > {layout(align-list s)}
 
   Condition.Zero = <<Expression> is zero>
 

@@ -41,7 +41,7 @@ rules
   statementOk(s, Jump(x)) :-
     resolveVar(s, x) == LBL().
 
-  statementOk(s, Label(x)) :-
+  statementOk(s, JumpLabel(x)) :-
     declareVar(s, x, LBL()).
 
   statementOk(s, If(c, stmts, e)) :-
@@ -59,6 +59,10 @@ rules
     elseOk(s, e).
   elseOk(s, Else(stmts)) :-
     statementsOk(s, stmts).
+
+  statementOk(s, VarScope(stmts)) :- {s_new}
+    new s_new, s_new-P->s,
+    statementsOk(s_new, stmts).
 
   typeOfExp(s, v@Value(x)) = T :-
     typeOfLiteral(s, x) == T,
@@ -123,11 +127,12 @@ rules
   reassignsOk([_]).
   reassignsOk([]).
 
-  resolveVar(s, x) = T :- {x'}
+  resolveVar(s, x) = T :- {p x'}
     query var
       filter P* and { x'' :- x'' == x }
         min $ < P and true
-          in s |-> [(_, (x', T))|_],
-    @x.ref := x'.
+          in s |-> [(p, (x', T))|_],
+    @x.ref := x',
+    @x.path := p.
 
   
