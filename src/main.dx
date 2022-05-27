@@ -9,7 +9,7 @@ signature
     PathStep : PATH * LABEL * SCOPE -> PATH
     PathEmpty : SCOPE -> PATH
     Label : string -> LABEL
-    Scope : string -> SCOPE
+    Scope : string * string -> SCOPE
 
 
 primitives
@@ -19,14 +19,18 @@ primitives
   expression #int-sub(@value, @value)
   expression #int-mul(@value, @value)
   expression #int-div(@value, @value)
-  expression #record-new()
-  expression #record-read(@value, @value)
-  expression #record-write(@value, @value, @value)
+//  expression #record-new()
+//  expression #record-read(@value, @value)
+//  expression #record-write(@value, @value, @value)
+  expression #ref-new(@value)
+  expression #ref-fetch(@value)
+  expression #ref-store(@value, @value)
   conditional #int-eq(@value, @value)
 
 constraint-analyzer
   property ref :: 'ID
-  property path :: 'PATH
+  property scope :: 'SCOPE
+  property vars :: 'ID
 
 signature
 constructors
@@ -34,9 +38,12 @@ constructors
 
 rules
   $exit :: @value
-  $scope :: @value
 
   evalProgram :: 'Start -> Holy
+  
+  evalVars :: List('ID) -> Holy
+  
+  evalVar :: 'ID -> Holy
 
   evalStatements :: List('Statement) -> Holy
 
@@ -56,19 +63,35 @@ rules
 
   evalElse :: 'Else * @value -> Holy(@value)
   
-  evalPath :: @value * 'PATH -> Holy(@value)
+  resolveVar :: 'ID -> @value
   
   unpackPath :: List('PATH) -> 'PATH
+  
+  unpackScope :: List('SCOPE) -> 'string
+  
+  unpackIdList :: List(List('ID)) -> List('ID)
 
-  evalProgram(Program(l)) = {
-    s <- #record-new()
-    with $exit = exit, $scope = s do {
+  evalProgram(p@Program(l)) = {
+    with $exit = exit do {
+      evalVars(vars(p))
       evalJumpLabels(l)
       evalStatements(l)
       $exit@([])
     }
   }
   label exit/0:
+  
+  evalVar(x) = {
+    v <- resolveVar(x)
+    ref <- #ref-new(int('0))
+    let v = ref in hole
+  }
+  
+  evalVars([a|b]) = {
+    evalVar(a)
+    evalVars(b)
+  }
+  evalVars([]) = hole
 
   evalJumpLabels([JumpLabel(l)|sts]) = {
     v <- var(l)
@@ -79,7 +102,8 @@ rules
         $exit@([])
       }
     }
-    #record-write($scope, str(l), v)
+    x <- resolveVar(l)
+    #ref-store(x, v)
   }
   evalJumpLabels([_|sts]) = evalJumpLabels(sts)
   evalJumpLabels([]) = hole
@@ -108,20 +132,20 @@ rules
 
   evalStatement(Assign(Variablee(_, x), e)) = {
     v <- evalExpression(e)
-    s <- evalPath($scope, unpackPath(path(x)))
-    #record-write(s, str(x), v)
+    s <- resolveVar(x)
+    #ref-store(s, v)
   }
 
   evalStatements([Jump(x)|_]) = {
-    s <- evalPath($scope, unpackPath(path(x)))
-    lab <- #record-read(s, str(x))
+    s <- resolveVar(x)
+    lab <- #ref-fetch(s)
     lab@([])
   }
   label noop/0:
 
   evalStatement(Jump(x)) = {
-    s <- evalPath($scope, unpackPath(path(x)))
-    lab <- #record-read(s, str(x))
+    s <- resolveVar(x)
+    lab <- #ref-fetch(s)
     lab@([])
   }
   label noop/0:
@@ -174,10 +198,9 @@ rules
   }
   evalElse(NoElse(), cont) = cont
 
-  evalStatement(VarScope(stmts)) = {
-    s <- #record-new()
-    #record-write(s, str('"main!P"), $scope)
-    with $scope = s do {
+  evalStatement(v@VarScope(stmts)) = {
+    with $exit = $exit do{
+      evalVars(vars(v))
       evalJumpLabels(stmts)
       evalStatements(stmts)
     }
@@ -189,15 +212,9 @@ rules
   evalExpression(Value(String(x))) = str(x)
 
   evalExpression(Variable(Variablee(_, x))) = {
-    s <- evalPath($scope, unpackPath(path(x)))
-    #record-read(s, str(x))
+    s <- resolveVar(x)
+    #ref-fetch(s)
   }
-  
-  evalPath(s, PathStep(p, Label(l), _)) = {
-    s_parent <- #record-read(s, str(l))
-    evalPath(s_parent, p)
-  }
-  evalPath(s, PathEmpty(_)) = s
 
   evalExpression(Add(e1, e2)) = {
     v1 <- evalExpression(e1)
@@ -223,19 +240,16 @@ rules
     #int-div(v1, v2)
   }
 
-  evalExpression(Lambda(paramNames, e)) = {
+  evalExpression(l@Lambda(paramNames, e)) = {
     lambda <- fresh-var(lambda)
     tail <- fresh-var(tail)
     params <- makeParamVars(paramNames)
     fix {
       fun lambda(params ++ [tail]) = {
-        s <- #record-new()
-        #record-write(s, str('"main!P"), $scope)
-        with $scope = s do {
-	        evalParameters(paramNames, params)
-	        r <- evalExpression(e)
-	        tail@([r])
-        }
+        evalVars(vars(l))
+        evalParameters(paramNames, params)
+        r <- evalExpression(e)
+        tail@([r])
       }
     }
     lambda
@@ -245,7 +259,8 @@ rules
   makeParamVars([]) = []
 
   evalParameters([name|nl], [param|pl]) = {
-    #record-write($scope, str(name), param)
+    s <- resolveVar(name)
+    #ref-store(s, param)
     evalParameters(nl, pl)
   }
 
@@ -266,5 +281,13 @@ rules
   }
   evalExpressions([]) = []
   
+  resolveVar(x) = {
+    s <- unpackScope(scope(x))
+    y <- '"_" + s
+    var(x + y)
+  }
+  
   unpackPath([p]) = p
+  unpackScope([Scope(_, s)]) = s
+  unpackIdList([x]) = x
 

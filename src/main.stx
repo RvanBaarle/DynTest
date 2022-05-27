@@ -26,9 +26,10 @@ rules
   typeOfExps maps typeOfExp(*, list(*)) = list(*)
   typeOfLiteral : scope * Value -> TYPE
   
-  programOk(Program(stmts)) :- {s}
+  programOk(p@Program(stmts)) :- {s}
     new s,
-    statementsOk(s, stmts).
+    statementsOk(s, stmts),
+    @p.vars := resolveAllVars(s).
 
   statementOk(s, Simple(e)) :-
     typeOfExp(s, e) == _.
@@ -77,9 +78,10 @@ rules
     noLabelsOk(stmts) | error $[Labels not allowed in conditional branch],
     statementsOk(s, stmts).
 
-  statementOk(s, VarScope(stmts)) :- {s_new}
+  statementOk(s, v@VarScope(stmts)) :- {s_new}
     new s_new, s_new-P->s,
-    statementsOk(s_new, stmts).
+    statementsOk(s_new, stmts),
+    @v.vars := resolveAllVars(s_new).
 
   typeOfExp(s, v@Value(x)) = T :-
     typeOfLiteral(s, x) == T,
@@ -123,19 +125,24 @@ rules
     new s_l, s_l-P->s,
     declareVars(s_l, args, Tp),
     typeOfExp(s_l, e) == Tr,
-    @x.type := T.
+    @x.type := T,
+    @x.vars := resolveAllVars(s_l).
 
   typeOfLiteral(s, Int(_)) = INT().
   typeOfLiteral(s, String(_)) = STR().
 
 rules
 
-  resolveVar : scope * ID -> TYPE
   declareVar : scope * ID * TYPE
   declareVars maps declareVar(*, list(*), list(*))
+  resolveVar : scope * ID -> TYPE
   resolveGlobalVar : scope * ID -> TYPE
   resolveNonLocalVar : scope * ID -> TYPE
+  resolveAllVars : scope -> list(ID)
   reassignsOk : list((path * (ID * TYPE)))
+  scopeFromPath : path -> scope
+  idFromResolution : (path * (ID * TYPE)) -> ID
+  idsFromResolutions maps idFromResolution(list(*)) = list(*)
   
   declareVar(s, x, T) :- {ps}
     !var[x, T] in s,
@@ -144,7 +151,7 @@ rules
         min $ < P and true
           in s |-> ps,
     reassignsOk(ps) | error $[Assignments of different types to variable [x]],
-    @x.path := _PathEmpty(s).
+    @x.scope := s.
 
   reassignsOk([a, b|t]) :- {T}
     a == (_, (_, T)),
@@ -159,7 +166,7 @@ rules
         min $ < P and true
           in s |-> [(p, (x', T)) | _] | error $[Undefined variable [x]],
     @x.ref := x',
-    @x.path := p.
+    @x.scope := scopeFromPath(p).
 
   resolveGlobalVar(s, x) = T :- {s_global p x'}
     query ()
@@ -171,15 +178,25 @@ rules
         min and true
           in s_global |-> [(_, (x', T)) | _] | error $[Undefined variable [x]],
     @x.ref := x',
-    @x.path := p.
+    @x.scope := s_global.
 
-  resolveNonLocalVar(s, x) = T :- {p x'}
+  resolveNonLocalVar(s, x) = T :- {p x' s_target}
     query var
       filter P+ and eq(x)
         min $ < P and true
           in s |-> [(p, (x', T)) | _] | error $[Undefined variable [x]],
     @x.ref := x',
-    @x.path := p.
+    @x.scope := scopeFromPath(p).
+  
+  resolveAllVars(s) = ids :- {ps}
+    query var
+      filter e and true
+        min and true
+          in s |-> ps,
+    idsFromResolutions(ps) == ids.
 
+  scopeFromPath(_PathEmpty(s)) = s.
+  scopeFromPath(_PathStep(_, _, s)) = s.
   
-  
+  idFromResolution((_, (x, _))) = x. 
+
